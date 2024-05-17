@@ -1,0 +1,12 @@
+{
+	"general": [
+		{
+			"type": "dropdown",
+			"question": "What is your sex?",
+			"options": [
+				"Female",
+				"Male"
+			]
+		}
+	]
+}
