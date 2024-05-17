@@ -8,5 +8,15 @@
 				"Male"
 			]
 		}
+	],
+	"health_disease": [
+	],
+	"health_attack": [
+	],
+	"health_disease_stage": [
+	],
+	"health_failure": [
+	],
+	"stroke": [
 	]
 }
