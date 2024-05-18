@@ -44,8 +44,12 @@ dummy_classifier = DummyClassifier(strategy = 'most_frequent')
 dummy_classifier.fit(X_train, y_train)
 
 def disease_prediction(patientData):
-	patientData = patientData[X_transformed.columns]
-	prediction = dummy_classifier.predict(patientData)[0]
-	return {
+	# Convert patient data to DataFrame
+    patient_df = pd.DataFrame([patientData], columns=df.columns.drop('HeartDisease'))
+    
+    # Encode categorical variables
+    patient_transformed = preprocessor.transform(patient_df)
+    prediction = dummy_classifier.predict(patient_transformed)[0]
+    return {
 		"predictedRisk": prediction
     }

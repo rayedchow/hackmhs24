@@ -1,47 +1,61 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 
+# Load the data
 data = pd.read_csv('./data/heart_disease_stage.csv')
-data = data.drop('dataset', axis=1)
-data = data.drop('id', axis=1)
+data = data.drop(['dataset', 'id'], axis=1)
 X = data.drop('num', axis=1)
 y = data['num']
 
-label_encoder = LabelEncoder()
-
+# Encode categorical features
+label_encoders = {}
 for col in X.columns:
-	if X[col].dtype == 'object' or X[col].dtype == 'category':
-		X[col] = label_encoder.fit_transform(X[col])
-	else:
-		pass
+    if X[col].dtype == 'object' or X[col].dtype == 'category':
+        le = LabelEncoder()
+        X[col] = le.fit_transform(X[col])
+        label_encoders[col] = le
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=None, random_state=0)
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
+# Scale the features
 scaler = MinMaxScaler()
-X_train = scaler.fit_transform(X_train)
+X_train_scaled = scaler.fit_transform(X_train)
 
-xgb_model = XGBClassifier(random_state=0)
+# Define the RandomForestClassifier
+rf = RandomForestClassifier(random_state=42)
 
+# Define the parameter grid
 param_grid = {
-	'n_estimators': [50, 100, 150],
-	'max_depth': [3, 5, 7],
-	'learning_rate': [0.01, 0.1, 0.2],
-	'subsample': [0.8, 1.0],
-	'colsample_bytree': [0.8, 1.0],
-	'gamma': [0, 1, 2]
+    'n_estimators': [50, 100, 150],
+    'max_depth': [3, 5, 7],
 }
 
-grid_search = GridSearchCV(xgb_model, param_grid, cv=5, scoring='accuracy')
-grid_search.fit(X_train, y_train)
+# Perform grid search with cross-validation
+grid_search = GridSearchCV(rf, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train_scaled, y_train)
 
-best_xgb_model = grid_search.best_estimator_
-best_xgb_model.fit(X_train, y_train)
+# Get the best model from grid search
+best_rf_model = grid_search.best_estimator_
 
-def stage_prediction(patientData):
-	patientData = patientData[X.columns]
-	prediction = best_xgb_model.predict(patientData)[0]
-	return {
-		"predictedRisk": prediction
-    }
+# Fit the best model on the entire training set
+best_rf_model.fit(X_train_scaled, y_train)
+
+# Function for making predictions
+def stage_prediction(patient_data):
+    patient_df = pd.DataFrame([patient_data])
+
+    # Encode categorical features
+    for col, le in label_encoders.items():
+        if col in patient_df.columns:
+            patient_df[col] = patient_df[col].apply(lambda x: le.transform([x])[0] if x in le.classes_ else -1)
+
+    # Scale the features
+    patient_df_scaled = scaler.transform(patient_df)
+
+    # Make prediction
+    prediction = best_rf_model.predict(patient_df_scaled)[0]
+
+    return {"predictedRisk": prediction}
