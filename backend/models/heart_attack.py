@@ -27,11 +27,20 @@ LR_model = make_pipeline(
 LR_model.fit(X_train,y_train)
 
 def attack_prediction(patientData):
-	patientData = pd.DataFrame(patientData)
-	patientData = patientData[X.columns]
-	print(patientData)
-	prediction = LR_model.predict(patientData)[0]
-	print(prediction)
-	return {
-		"predictedRisk": int(prediction)
+    patientData = pd.DataFrame([patientData], columns=X.columns)
+    prediction = LR_model.predict(patientData)[0]
+    
+    # Calculate feature importances (coefficients)
+    coefficients = LR_model.named_steps['logisticregression'].coef_[0]
+    feature_importance = dict(zip(X.columns, coefficients))
+    
+    # Sort features by importance
+    sorted_features = sorted(feature_importance.items(), key=lambda x: abs(x[1]), reverse=True)
+    
+    # Get top 3 impactful factors
+    top_factors = sorted_features[:3]
+    
+    return {
+        "predictedRisk": int(round(prediction)),
+        "mostImpactfulFactors": list(feature_importance.items())
     }

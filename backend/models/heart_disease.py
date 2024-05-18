@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 df = pd.read_csv('./data/heart_disease.csv')
 
 # drop 'State' and 'Sex' columns
-df.drop(columns = ['State', 'Sex'], inplace = True)
+df.drop(columns = ['State', 'sex'], inplace = True)
 
 # Encoding columns
 replacement_dict = {'Yes': 1, 'No': 0}
@@ -51,5 +51,5 @@ def disease_prediction(patientData):
     patient_transformed = preprocessor.transform(patient_df)
     prediction = dummy_classifier.predict(patient_transformed)[0]
     return {
-		"predictedRisk": prediction
+		"predictedRisk": int(round(prediction))
     }

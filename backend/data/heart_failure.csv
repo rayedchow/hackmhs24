@@ -1,4 +1,4 @@
-age,anaemia,creatinine_phosphokinase,diabetes,ejection_fraction,high_blood_pressure,platelets,serum_creatinine,serum_sodium,sex,smoking,time,DEATH_EVENT
+age,anaemia,creatinine_phosphokinase,diabetes,ejection_fraction,high_blood_pressure,platelets,serum_creatinine,serum_sodium,sex,smoking_status,time,DEATH_EVENT
 55.0,0,748,0,45,0,263358.03,1.3,137,1,1,88,0
 65.0,0,56,0,25,0,305000.0,5.0,130,1,0,207,0
 45.0,0,582,1,38,0,319000.0,0.9,140,0,0,244,0

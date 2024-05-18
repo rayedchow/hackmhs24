@@ -11,7 +11,7 @@ df["bmi"] = df["bmi"].fillna(28.4)
 
 df["Residence_type"] = df["Residence_type"].apply(lambda x: 1 if x == "Urban" else 0)
 df["ever_married"] = df["ever_married"].apply(lambda x: 1 if x == "Yes" else 0)
-df["gender"] = df["gender"].apply(lambda x: 1 if x == "Male" else 0)
+df["sex"] = df["sex"].apply(lambda x: 1 if x == "Male" else 0)
 
 df = pd.get_dummies(data=df, columns=['smoking_status', 'work_type'])
 
@@ -44,7 +44,7 @@ def stroke_prediction(patientData):
     patient_df["bmi"] = patient_df["bmi"].fillna(28.4)
     patient_df["Residence_type"] = patient_df["Residence_type"].apply(lambda x: 1 if x == "Urban" else 0)
     patient_df["ever_married"] = patient_df["ever_married"].apply(lambda x: 1 if x == "Yes" else 0)
-    patient_df["gender"] = patient_df["gender"].apply(lambda x: 1 if x == "Male" else 0)
+    patient_df["sex"] = patient_df["sex"].apply(lambda x: 1 if x == "Male" else 0)
     patient_df = pd.get_dummies(data=patient_df, columns=['smoking_status', 'work_type'])
 
     # Ensure all columns present
@@ -64,6 +64,17 @@ def stroke_prediction(patientData):
     # Make prediction
     prediction = model.predict(patient_df)[0]
     
+    # Get feature importances (coefficients)
+    coefficients = model.coef_[0]
+    feature_importance = dict(zip(X.columns, coefficients))
+    
+    # Sort features by importance
+    sorted_features = sorted(feature_importance.items(), key=lambda x: abs(x[1]), reverse=True)
+    
+    # Get top 3 impactful factors
+    top_factors = sorted_features[:3]
+
     return {
-        "predictedRisk": prediction
+        "predictedRisk": int(round(prediction)),
+        "mostImpactfulFactors": list(feature_importance.items())
     }
